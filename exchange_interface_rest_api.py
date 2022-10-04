@@ -1,5 +1,6 @@
 import json
 import time
+from asyncio import sleep
 
 import ccxt
 
@@ -27,7 +28,7 @@ async def create_new_order(exchange, symbol, type, side, amount, price):
     print(f"-{exchange.id}-------------------------------- create_new_order -----------------------------------")
     try:
         order = await exchange.create_order(symbol, type, side, amount, price)
-        print(json.dumps(order, indent=4))
+        # print(json.dumps(order, indent=4))
         return order
     except ccxt.InsufficientFunds as e:
         print("ERROR: Insufficient Funds")
@@ -36,10 +37,9 @@ async def create_new_order(exchange, symbol, type, side, amount, price):
 
 async def make_orders(exchange, coin_buy, coin_sell, symbol):
     coin_list = [coin_buy, coin_sell]
-    symbol_list = [symbol]
 
-    print(f"-{exchange.id}--------------------------------- fetch_tickers -----------------------------------")
-    print(json.dumps(await exchange.fetch_tickers(symbols=symbol_list), indent=4))
+    # print(f"-{exchange.id}--------------------------------- fetch_tickers -----------------------------------")
+    # print(json.dumps(await exchange.fetch_tickers(symbols=[symbol]), indent=4))
     await fetch_balance(exchange, coin_list)
 
     order1 = await create_new_order(exchange, symbol, "limit", "buy", amount=0.01, price=constants.ETH_PRICE_LOW)
@@ -78,18 +78,29 @@ async def test_rate_limit(exchange, symbol):
             print('Got Exception :| ', e)
 
 
-async def test_orders(exchange):
+async def loop_orders(exchange, coin_buy, coin_sell, symbol):
+    i = 0
+    while i <= 2:
+        i += 1
+        sleep(5000)
+        order1 = await create_new_order(exchange, symbol, "limit", "buy", amount=0.01, price=constants.ETH_PRICE_LOW)
+        order2 = await create_new_order(exchange, symbol, "limit", "buy", amount=0.02, price=constants.ETH_PRICE_LOW)
+        sleep(7000)
+        print(f"-{exchange.id}--------------------------------- cancel_order {order1['id']} ------------------")
+        await exchange.cancel_order(order1['id'], symbol)
+
+
+async def test_orders(exchange, coin_buy, coin_sell):
     try:
         print(exchange.id)
         markets = await exchange.load_markets()
-        coin_buy = "ETH"
-        coin_sell = "USDT"
         symbol = coin_buy + "/" + coin_sell
 
         # print(json.dumps(markets[symbol], indent=4))
 
-        await make_orders(exchange, coin_buy, coin_sell, symbol)
-        await test_rate_limit(exchange, symbol)
+        await loop_orders(exchange, coin_buy, coin_sell, symbol)
+        # await make_orders(exchange, coin_buy, coin_sell, symbol)
+        # await test_rate_limit(exchange, symbol)
 
         return "success"
 
