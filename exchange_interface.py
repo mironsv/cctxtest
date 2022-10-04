@@ -1,4 +1,5 @@
 import json
+import time
 
 import ccxt
 
@@ -62,7 +63,22 @@ def make_orders(exchange, coin_buy, coin_sell, symbol):
     fetch_balance(exchange, coin_list)
 
 
-async def execute(exchange):
+def test_rate_limit(exchange, symbol):
+    i = 0
+    start_time = time.time()
+    exchange.rateLimit = 300
+    while i < 1000:
+        try:
+            ticker = exchange.fetch_ticker(symbol)
+            end_time = time.time()
+            print(i, end_time - start_time)
+            start_time = end_time
+            i += 1
+        except Exception as e:
+            print('Got Exception :| ', e)
+
+
+async def test_orders(exchange):
     try:
         print(exchange.id)
         markets = exchange.load_markets()
@@ -73,6 +89,7 @@ async def execute(exchange):
         # print(json.dumps(markets[symbol], indent=4))
 
         make_orders(exchange, coin_buy, coin_sell, symbol)
+        test_rate_limit(exchange, symbol)
 
         return "success"
 
