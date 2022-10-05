@@ -1,3 +1,4 @@
+import time
 from pprint import pprint
 
 
@@ -18,6 +19,9 @@ async def watch_orders_loop(exchange, symbol):
         try:
             orders = await exchange.watch_orders(symbol)
             print(exchange.iso8601(exchange.milliseconds()), 'watch_orders_loop', len(orders), ' last orders cached')
+            # parsed_orders = [exchange.parse_ws_order(order) for order in orders]
+            # print('----------------------------------- parsed_orders ----------------------------')
+            # pprint(parsed_orders)
             print('---------------------------------------------------------------')
         except Exception as e:
             # break

@@ -79,14 +79,14 @@ async def test_rate_limit(exchange, symbol):
 
 
 async def loop_orders(exchange, coin_buy, coin_sell, symbol):
-    i = 0
-    while i <= 2:
-        i += 1
+    cntr = 0
+    while cntr < 2:
+        cntr += 1
         sleep(5000)
         order1 = await create_new_order(exchange, symbol, "limit", "buy", amount=0.01, price=constants.ETH_PRICE_LOW)
         order2 = await create_new_order(exchange, symbol, "limit", "buy", amount=0.02, price=constants.ETH_PRICE_LOW)
         sleep(7000)
-        print(f"-{exchange.id}--------------------------------- cancel_order {order1['id']} ------------------")
+        print(f"-{exchange.id}--------------------------------- cancel_order {order1['id']} ----- cntr = {cntr} -----")
         await exchange.cancel_order(order1['id'], symbol)
 
 
